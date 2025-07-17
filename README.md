@@ -238,7 +238,7 @@ docker-compose logs ngrok
 ## Successful Test Results
 
 ### Dev server
-![img_1.png](img_1.png) 
+![img_1.png](img_1.png)
 
 ### Webhook receiver
 ![img_2.png](img_2.png)
