@@ -18,7 +18,16 @@ try:
     if not google_api_key:
         raise ValueError("GOOGLE_API_KEY not found in environment variables.")
     genai.configure(api_key=google_api_key)
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    # Added safety_settings to be less restrictive. Tune if needed.
+    model = genai.GenerativeModel(
+        'gemini-2.0-flash',
+        safety_settings={
+            'HARM_CATEGORY_HATE_SPEECH': 'BLOCK_NONE',
+            'HARM_CATEGORY_HARASSMENT': 'BLOCK_NONE',
+            'HARM_CATEGORY_SEXUALLY_EXPLICIT': 'BLOCK_NONE',
+            'HARM_CATEGORY_DANGEROUS_CONTENT': 'BLOCK_NONE'
+        }
+    )
 except Exception as e:
     print(f"Error initializing Google AI Client: {e}")
     model = None
@@ -40,7 +49,6 @@ except Exception as e:
 def sms_reply():
     """Receive SMS from Twilio, process with AI, and send reply."""
 
-    # Get the message body and sender's number from the incoming request
     incoming_msg = request.values.get('Body', '').strip()
     from_number = request.values.get('From', '')
 
@@ -52,19 +60,38 @@ def sms_reply():
 
     try:
         # --- Step 1: Perform the main task with the AI agent ---
-        # This is where you would integrate the "Cursor AI" agent.
-        # We are using Gemini here as a powerful, general-purpose agent.
         print("Asking AI agent to perform the main task...")
-        main_task_prompt = incoming_msg
-        main_result = model.generate_content(main_task_prompt)
-        detailed_text = main_result.text
+        main_result = model.generate_content(incoming_msg)
+
+        # ADDED: Robust check for response content.
+        # This handles cases where the API blocks the prompt for safety reasons.
+        try:
+            detailed_text = main_result.text
+        except ValueError:
+            # If .text fails, it's likely the prompt was blocked.
+            print(f"AI response was blocked. Feedback: {main_result.prompt_feedback}")
+            twilio_client.messages.create(
+                body='Sorry, your request could not be processed. It may have been blocked for safety reasons. Please try a different prompt.',
+                from_=twilio_phone_number,
+                to=from_number
+            )
+            # Acknowledge the request was received and handled.
+            return Response(str(MessagingResponse()), mimetype='application/xml')
+
         print("AI agent generated a detailed response.")
 
         # --- Step 2: Summarize the result for SMS ---
         print("Asking AI agent to summarize the response for SMS...")
         summary_prompt = f'Please summarize the following text to be under 160 characters, suitable for an SMS message. Be concise and direct. Text: "{detailed_text}"'
         summary_result = model.generate_content(summary_prompt)
-        sms_friendly_text = summary_result.text
+
+        try:
+            sms_friendly_text = summary_result.text
+        except ValueError:
+            print(f"AI summary response was blocked. Feedback: {summary_result.prompt_feedback}")
+            # Fallback to a simple truncation if summarization fails
+            sms_friendly_text = (detailed_text[:155] + '...') if len(detailed_text) > 155 else detailed_text
+
         print(f"Generated SMS-friendly summary: '{sms_friendly_text}'")
 
         # --- Step 3: Send the summary back to the user via Twilio ---
@@ -76,11 +103,11 @@ def sms_reply():
         print(f"Successfully sent summary to {from_number}")
 
     except Exception as e:
-        print(f"An error occurred: {e}")
-        # --- Error Handling: Inform the user if something went wrong ---
+        # This will now catch other unexpected errors (e.g., network issues, invalid API key)
+        print(f"An unexpected error occurred: {e}")
         try:
             twilio_client.messages.create(
-                body='Sorry, I encountered an error and could not process your request. Please try again.',
+                body='Sorry, an unexpected error occurred and I could not process your request. Please check the server logs.',
                 from_=twilio_phone_number,
                 to=from_number
             )
@@ -92,6 +119,4 @@ def sms_reply():
 
 
 if __name__ == "__main__":
-    # This block is for local development without Docker
-    # When using Docker, the `flask run` command is used instead.
     app.run(debug=True, port=5000)
