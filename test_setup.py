@@ -19,12 +19,16 @@ def test_environment_variables():
         "TWILIO_ACCOUNT_SID",
         "TWILIO_AUTH_TOKEN",
         "TWILIO_PHONE_NUMBER",
-        "GOOGLE_API_KEY"
+        "CURSOR_API_KEY",
+        "OPENAI_API_KEY"
     ]
     
     optional_vars = [
+        "CURSOR_WORKSPACE_ID",
         "NGROK_AUTHTOKEN",
-        "AI_MODEL",
+        "ENABLE_VOICE_ASSISTANT",
+        "VOICE_LANGUAGE",
+        "VOICE_RATE",
         "MAX_SMS_LENGTH"
     ]
     
@@ -52,31 +56,57 @@ def test_environment_variables():
     print("✅ All required environment variables are set!")
     return True
 
-def test_google_ai():
-    """Test Google AI API connection"""
-    print("\n🤖 Testing Google AI API...")
+def test_cursor_ai():
+    """Test Cursor AI integration"""
+    print("\n🤖 Testing Cursor AI integration...")
     
     try:
-        import google.generativeai as genai
+        from cursor_agent import CursorAgent
         
-        api_key = os.environ.get("GOOGLE_API_KEY")
-        genai.configure(api_key=api_key)
+        cursor_agent = CursorAgent()
         
-        model_name = os.environ.get("AI_MODEL", "gemini-2.0-flash")
-        model = genai.GenerativeModel(model_name)
+        # Test with a simple task
+        result = cursor_agent.create_task("Say 'Hello, world!' in exactly 3 words.")
         
-        # Test with a simple prompt
-        response = model.generate_content("Say 'Hello, world!' in exactly 3 words.")
-        
-        if hasattr(response, 'text') and response.text:
-            print(f"✅ Google AI API working! Test response: '{response.text}'")
+        if result["success"] and result["response"]:
+            print(f"✅ Cursor AI working! Test response: '{result['response'][:100]}...'")
             return True
         else:
-            print("❌ Google AI API returned empty response")
+            print(f"❌ Cursor AI returned error: {result.get('error', 'Unknown error')}")
             return False
             
     except Exception as e:
-        print(f"❌ Google AI API test failed: {e}")
+        print(f"❌ Cursor AI test failed: {e}")
+        return False
+
+def test_voice_assistant():
+    """Test Voice Assistant functionality"""
+    print("\n🎤 Testing Voice Assistant...")
+    
+    try:
+        from voice_assistant import VoiceAssistant
+        
+        voice_assistant = VoiceAssistant()
+        
+        if voice_assistant.enable_voice:
+            print("✅ Voice assistant enabled")
+            
+            # Test text-to-speech
+            test_text = "Hello, this is a test of the voice assistant."
+            result = voice_assistant.text_to_speech(test_text)
+            
+            if result["success"]:
+                print("✅ Text-to-speech working")
+                return True
+            else:
+                print(f"❌ Text-to-speech failed: {result.get('error', 'Unknown error')}")
+                return False
+        else:
+            print("⚠️  Voice assistant disabled (optional)")
+            return True
+            
+    except Exception as e:
+        print(f"❌ Voice assistant test failed: {e}")
         return False
 
 def test_twilio():
@@ -135,7 +165,8 @@ def main():
     
     tests = [
         test_environment_variables,
-        test_google_ai,
+        test_cursor_ai,
+        test_voice_assistant,
         test_twilio,
         test_flask_app
     ]
@@ -162,6 +193,7 @@ def main():
         print("1. Run: docker-compose up --build")
         print("2. Configure your Twilio webhook URL")
         print("3. Send an SMS to test the system!")
+        print("4. Use voice endpoints for Siri/Alexa integration")
     else:
         print(f"⚠️  {passed}/{total} tests passed. Please fix the issues above.")
         sys.exit(1)
