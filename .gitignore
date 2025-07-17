@@ -1,0 +1,65 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+eggs/
+.eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Environments
+.venv/
+venv/
+env/
+ENV/
+.env/
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*~
+*.DS_Store
+*.DS_Store/
+
+# Pytest cache
+.pytest_cache/
+
+# Test files to exclude
+test.json
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Coverage reports
+.coverage
+.coverage.*
+
+# Database files (if using local flat files)
+*.db
+*.app
+*.sqlite3
+
+# Specific credentials or configuration
+config.local.py
+.env
+/scratch.md
+
+# Logs
+*.log
+
+# Docker
+docker-compose.override.yml # Often used for local overrides
+
+/img.png
