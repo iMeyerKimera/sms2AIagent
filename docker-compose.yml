@@ -2,7 +2,7 @@ version: '3.8'
 services:
   web:
     build: .
-    container_name: python_sms_agent
+    container_name: enhanced_sms_agent
     ports:
       - "5001:5000" # Expose container port 5000 to host port 5001
     env_file:
@@ -11,11 +11,16 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      timeout: 15s
+      retries: 5
+      start_period: 60s
     volumes:
       - ./logs:/app/logs
+      - ./data:/app/data
+      - app_databases:/app
+    environment:
+      - FLASK_ENV=production
+      - PYTHONPATH=/app
     networks:
       - sms_network
 
@@ -26,7 +31,7 @@ services:
       - "4040:4040"
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
-    command: http web:5000
+    command: http web:5000 --domain=${NGROK_DOMAIN} --log=stdout --log-format=json
     depends_on:
       web:
         condition: service_healthy
@@ -34,9 +39,24 @@ services:
     networks:
       - sms_network
 
+  # Optional: Redis for caching and session management (for future scaling)
+  redis:
+    image: redis:7-alpine
+    container_name: sms_agent_redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - sms_network
+    profiles:
+      - scaling
+
 networks:
   sms_network:
     driver: bridge
 
 volumes:
   logs: 
+  redis_data:
+  app_databases:
+  data: 

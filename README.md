@@ -4,22 +4,32 @@ A system that allows you to send tasks to a Cursor AI agent via SMS and receive 
 
 ## Features
 
-- **SMS Integration**: Send tasks via text message to your Cursor AI agent
-- **Cursor AI Powered**: Uses Cursor AI for code generation and technical tasks
-- **Voice Assistant Support**: Text-to-speech and speech-to-text for Siri/Alexa compatibility
-- **SMS-Friendly Responses**: Automatically summarizes results to fit SMS character limits
-- **Docker Deployment**: Easy containerized deployment with ngrok for webhook exposure
-- **Error Handling**: Robust error handling and fallback mechanisms
-- **Rate Limiting**: Built-in rate limiting to prevent abuse
+- 📱 **SMS Integration**: Send tasks via text message to your Cursor AI agent
+- 🤖 **Cursor AI Powered**: Uses advanced AI for code generation and technical tasks
+- 🧠 **Intelligent Task Routing**: Automatic categorization (coding, debug, design, documentation, analysis)
+- 👥 **Multi-Tier User Management**: Free, Premium, Enterprise tiers with smart rate limiting
+- 📊 **Advanced Analytics Dashboard**: Real-time monitoring, task insights, and user management
+- 📨 **Multi-Channel Notifications**: SMS, Email, Slack, Discord integration
+- 🎙️ **Voice Assistant Support**: Text-to-speech and speech-to-text for Siri/Alexa compatibility
+- 📱 **SMS-Friendly Responses**: Intelligent summarization for mobile-optimized responses
+- 🌐 **Permanent Domains**: Static ngrok URLs for consistent webhook endpoints
+- 🐳 **Production-Ready Docker**: Enhanced containerized deployment with health monitoring
+- 🔒 **Enterprise Security**: Advanced rate limiting, validation, and admin authentication
+- 📈 **Real-time Monitoring**: Comprehensive health checks and system metrics
+
+## 📚 Documentation
+
+- 📖 **[User Guide](USER_GUIDE.md)** - Complete guide to using task routing and advanced features
+- 🌐 **[Ngrok Setup](NGROK_SETUP.md)** - How to configure permanent domains
+- 🚀 **[Production Setup](PRODUCTION_SETUP.md)** - Complete production deployment guide
 
 ## Prerequisites
 
-- Python 3.10+
+- Python 3.11+
 - Docker and Docker Compose
 - Twilio account (for SMS functionality)
-- Cursor AI API key
-- OpenAI API key (for Cursor AI integration)
-- Ngrok account (for exposing local server)
+- OpenAI API key (for AI integration)
+- Ngrok account (for webhook exposure and permanent domains)
 
 ## Quick Start
 
