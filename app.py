@@ -28,10 +28,20 @@ logger = logging.getLogger(__name__)
 from cursor_agent import CursorAgent
 from voice_assistant import VoiceAssistant
 
+
+# Import admin dashboard separately (always available)
+try:
+    from admin_dashboard import admin_bp
+    logger.info("Admin dashboard loaded successfully")
+    ADMIN_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"Admin dashboard not available: {e}")
+    admin_bp = None
+    ADMIN_AVAILABLE = False
+
 # Temporarily disable advanced components for testing
 try:
     from task_router import TaskRouter
-    from admin_dashboard import admin_bp
     from notification_system import NotificationSystem, notify_task_completion, notify_system_alert
     ADVANCED_FEATURES_AVAILABLE = True
     logger.info("Advanced features loaded successfully")
@@ -39,7 +49,14 @@ except ImportError as e:
     logger.warning(f"Advanced features not available: {e}")
     ADVANCED_FEATURES_AVAILABLE = False
     TaskRouter = None
-    admin_bp = None
+    NotificationSystem = None
+    notify_task_completion = None
+    notify_system_alert = None
+    logger.info("Advanced features loaded successfully")
+except ImportError as e:
+    logger.warning(f"Advanced features not available: {e}")
+    ADVANCED_FEATURES_AVAILABLE = False
+    TaskRouter = None
     NotificationSystem = None
     notify_task_completion = None
     notify_system_alert = None

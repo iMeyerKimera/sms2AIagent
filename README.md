@@ -1,264 +1,185 @@
-# SMS-to-Cursor Agent System
+# 📱 SMS-to-AI Agent
 
-A system that allows you to send tasks to a Cursor AI agent via SMS and receive SMS-friendly summaries of completed work back on your phone, with voice assistant support for Siri/Alexa integration.
+**Turn your phone into a powerful AI development assistant!** Send SMS messages to get instant help with coding, debugging, design, and more - all powered by advanced AI and intelligent task routing.
 
-## Features
+---
 
-- 📱 **SMS Integration**: Send tasks via text message to your Cursor AI agent
-- 🤖 **Cursor AI Powered**: Uses advanced AI for code generation and technical tasks
-- 🧠 **Intelligent Task Routing**: Automatic categorization (coding, debug, design, documentation, analysis)
-- 👥 **Multi-Tier User Management**: Free, Premium, Enterprise tiers with smart rate limiting
-- 📊 **Advanced Analytics Dashboard**: Real-time monitoring, task insights, and user management
-- 📨 **Multi-Channel Notifications**: SMS, Email, Slack, Discord integration
-- 🎙️ **Voice Assistant Support**: Text-to-speech and speech-to-text for Siri/Alexa compatibility
-- 📱 **SMS-Friendly Responses**: Intelligent summarization for mobile-optimized responses
-- 🌐 **Permanent Domains**: Static ngrok URLs for consistent webhook endpoints
-- 🐳 **Production-Ready Docker**: Enhanced containerized deployment with health monitoring
-- 🔒 **Enterprise Security**: Advanced rate limiting, validation, and admin authentication
-- 📈 **Real-time Monitoring**: Comprehensive health checks and system metrics
+## 🚀 **Quick Start**
 
-## 📚 Documentation
-
-- 📖 **[User Guide](USER_GUIDE.md)** - Complete guide to using task routing and advanced features
-- 🌐 **[Ngrok Setup](NGROK_SETUP.md)** - How to configure permanent domains
-- 🚀 **[Production Setup](PRODUCTION_SETUP.md)** - Complete production deployment guide
-
-## Prerequisites
-
-- Python 3.11+
-- Docker and Docker Compose
-- Twilio account (for SMS functionality)
-- OpenAI API key (for AI integration)
-- Ngrok account (for webhook exposure and permanent domains)
-
-## Quick Start
-
-### 1. Clone and Setup
-
+### **Get Running in 5 Minutes**
 ```bash
-git clone <repository-url>
+# Clone and start
+git clone <your-repo>
 cd sms2AIagent
-```
-
-### 2. Configure Environment Variables
-
-Copy the example environment file and configure your credentials:
-
-```bash
 cp env.example .env
+# Edit .env with your Twilio & OpenAI credentials
+docker-compose up -d
+
+# Check health
+curl http://localhost:5001/health
 ```
 
-Edit `.env` with your actual credentials:
+**📚 [Complete Quick Start Guide](docs/getting-started/QUICK_START.md)**
 
-```env
-# Twilio Configuration
-TWILIO_ACCOUNT_SID=your_twilio_account_sid_here
-TWILIO_AUTH_TOKEN=your_twilio_auth_token_here
-TWILIO_PHONE_NUMBER=+1234567890
+---
 
-# Cursor AI Configuration
-CURSOR_API_KEY=your_cursor_api_key_here
-CURSOR_WORKSPACE_ID=your_cursor_workspace_id_here
+## 🎯 **Key Features**
 
-# OpenAI Configuration (for Cursor AI integration)
-OPENAI_API_KEY=your_openai_api_key_here
+- **📱 SMS Processing**: Intelligent SMS-to-AI task routing
+- **🧠 AI Integration**: OpenAI and Cursor AI integration  
+- **👥 User Management**: Multi-tier user system (Free/Premium/Enterprise)
+- **📊 Analytics Dashboard**: Real-time system monitoring and user analytics
+- **🔧 Admin Tools**: Complete administrative interface
+- **🐳 Docker Ready**: Containerized deployment with PostgreSQL and Redis
+- **📈 Scalable**: Production-ready with monitoring and logging
 
-# Ngrok Configuration
-NGROK_AUTHTOKEN=your_ngrok_auth_token_here
+---
 
-# Voice Assistant Configuration (optional)
-ENABLE_VOICE_ASSISTANT=True
-VOICE_LANGUAGE=en-US
-VOICE_RATE=150
+## 📖 **Documentation**
+
+### **🎯 New Users - Start Here**
+- **[🚀 Quick Start](docs/getting-started/QUICK_START.md)** - Get running in 5 minutes
+- **[📱 User Guide](docs/user-guides/USER_GUIDE.md)** - Complete SMS usage guide
+- **[🔧 Admin Guide](docs/user-guides/ADMIN_GUIDE.md)** - Dashboard and user management
+
+### **⚙️ Setup & Deployment**
+- **[📦 Installation Guide](docs/getting-started/INSTALLATION.md)** - Complete setup instructions
+- **[🚀 Production Deployment](docs/operations/PRODUCTION.md)** - Production-ready deployment
+- **[🔍 Troubleshooting](docs/operations/TROUBLESHOOTING.md)** - Common issues and solutions
+
+### **💻 Development**
+- **[🏗️ Architecture](docs/development/ARCHITECTURE.md)** - System design and architecture
+- **[🗄️ Database Guide](docs/development/DATABASE.md)** - Database schema and management
+- **[🔌 API Reference](docs/user-guides/API_REFERENCE.md)** - REST API documentation
+
+### **📚 [Complete Documentation Index](docs/README.md)**
+
+---
+
+## 🎮 **How It Works**
+
+### **For SMS Users**
+1. **Send SMS** to your Twilio number
+2. **AI analyzes** your message and determines the best approach
+3. **Intelligent routing** directs coding questions to specialized AI models
+4. **Get responses** optimized for your request type and user tier
+
+### **For Administrators**
+1. **Monitor everything** via the web dashboard
+2. **Manage users** and upgrade/downgrade tiers
+3. **Send messages** to individual users or broadcast to all
+4. **View analytics** and system performance metrics
+
+---
+
+## 🏗️ **System Architecture**
+
+```
+[SMS Users] → [Twilio] → [SMS-to-AI Agent] → [OpenAI/Cursor AI]
+                              ↓
+                      [PostgreSQL Database]
+                              ↓
+                      [Admin Dashboard] ← [Administrators]
 ```
 
-### 3. Start the System
+### **Technology Stack**
+- **Backend**: Django + Django REST Framework
+- **Database**: PostgreSQL with Redis caching
+- **AI Integration**: OpenAI GPT-4, Cursor AI
+- **SMS**: Twilio API
+- **Frontend**: Bootstrap + JavaScript
+- **Deployment**: Docker + Docker Compose
 
-```bash
-docker-compose up --build
-```
+---
 
-### 4. Configure Twilio Webhook
+## 🔗 **Quick Access**
 
-1. Go to your Twilio Console
-2. Navigate to Phone Numbers → Manage → Active numbers
-3. Click on your phone number
-4. Set the webhook URL for incoming messages to:
-   ```
-   https://your-ngrok-url.ngrok-free.app/sms
-   ```
-   Get your your-ngrok-url here after you stand up the system's container
-   ```
-   http://0.0.0.0:4040/inspect/http
-   ```
-5. Set the HTTP method to POST
-6. Locally test the system's health and functionality
-   ```
-   docker-compose exec web python test_setup.py
-   ```
+### **System URLs**
+- **Admin Dashboard**: http://localhost:5001/dashboard/
+- **Django Admin**: http://localhost:5001/admin/
+- **API Documentation**: http://localhost:5001/api/
+- **Health Check**: http://localhost:5001/health
 
-### 5. Test the SMS System
+### **Default Credentials**
+- **Admin Dashboard**: admin / admin123
+- **Django Admin**: Create superuser with `python manage.py createsuperuser`
 
-Send an SMS to your Twilio phone number with a task like:
-- "Write a Python function to calculate fibonacci numbers"
-- "Create a React component for a todo list"
-- "Explain how Docker containers work"
-- "Debug this JavaScript code: [paste code]"
+---
 
-## How It Works
+## 👥 **User Tiers**
 
-1. **Receive SMS**: Twilio receives your SMS and forwards it to the Flask webhook
-2. **Task Analysis**: The system analyzes if your request is a coding task
-3. **Cursor AI Processing**: Coding tasks are handled by Cursor AI, general tasks by OpenAI
-4. **Voice Response**: If enabled, creates voice-friendly audio responses
-5. **Summarization**: The AI response is automatically summarized to fit SMS character limits
-6. **Response**: The summarized result is sent back to your phone via SMS
+| Tier | SMS/Hour | AI Tokens | Features |
+|------|----------|-----------|----------|
+| 🆓 **Free** | 10 | 1,000 | Basic task routing |
+| ⭐ **Premium** | 50 | 4,000 | Enhanced routing, priority |
+| 🏢 **Enterprise** | Unlimited | 8,000 | Custom configs, white-label |
 
-## Voice Assistant Integration
+---
 
-### Siri/Alexa Compatibility
+## 🧠 **Intelligent Task Routing**
 
-The system includes voice assistant capabilities for integration with Siri and Alexa:
+The system automatically categorizes and routes SMS messages:
 
-#### Text-to-Speech Endpoint
-```bash
-curl -X POST http://localhost:5001/voice \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "text_to_speech",
-    "text": "Your response text here"
-  }'
-```
+- **🖥️ Coding**: Programming tasks, code generation
+- **🐛 Debug**: Error analysis, troubleshooting  
+- **🎨 Design**: UI/UX design, architecture planning
+- **📝 Documentation**: Writing docs, README files
+- **📊 Analysis**: Data analysis, research
+- **💬 General**: Questions, conversations, explanations
 
-#### Speech-to-Text Endpoint
-```bash
-curl -X POST http://localhost:5001/voice \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "speech_to_text",
-    "audio_file": "path/to/audio.wav"
-  }'
-```
+Each category gets optimized AI prompts and processing parameters.
 
-#### Monitor Local Ngrok requests
-You can monitor your sms post requests here:
-```
-http://0.0.0.0:4040/inspect/http
-```
+---
 
-#### Audio File Access
-Generated audio files are available at:
-```
-http://localhost:5001/audio/filename.mp3
-```
+## 🚀 **Getting Started Paths**
 
-### Voice Assistant Features
+### **🆕 First Time User?**
+1. **[Quick Start](docs/getting-started/QUICK_START.md)** - Get running in 5 minutes
+2. **[User Guide](docs/user-guides/USER_GUIDE.md)** - Learn to use SMS features
+3. **[Admin Guide](docs/user-guides/ADMIN_GUIDE.md)** - Manage users and system
 
-- **Text-to-Speech**: Converts AI responses to speech
-- **Speech-to-Text**: Converts voice input to text
-- **Voice Optimization**: Automatically optimizes technical content for voice output
-- **Multi-language Support**: Configurable language settings
-- **Siri/Alexa Integration**: Compatible with voice assistant platforms
+### **🔧 Production Deployment?**
+1. **[Installation Guide](docs/getting-started/INSTALLATION.md)** - Complete setup
+2. **[Production Deployment](docs/operations/PRODUCTION.md)** - Production best practices
+3. **[Monitoring Guide](docs/operations/MONITORING.md)** - Set up monitoring
 
-## API Endpoints
+### **💻 Developer/Customization?**
+1. **[Architecture Guide](docs/development/ARCHITECTURE.md)** - Understand the system
+2. **[Database Guide](docs/development/DATABASE.md)** - Database schema and operations
+3. **[API Reference](docs/user-guides/API_REFERENCE.md)** - API endpoints and usage
 
-- `POST /sms`: Main webhook endpoint for receiving SMS messages from Twilio
-- `GET /health`: Health check endpoint
-- `POST /voice`: Voice assistant endpoint for Siri/Alexa integration
-- `GET /audio/<filename>`: Serve generated audio files
-- `GET /cursor/workspace`: Get Cursor workspace information
+---
 
-## Configuration Options
+## 🆘 **Need Help?**
 
-### Voice Assistant Settings
+### **Common Issues**
+- **[Troubleshooting Guide](docs/operations/TROUBLESHOOTING.md)** - Comprehensive issue resolution
+- **[Production Issues](docs/operations/PRODUCTION.md#troubleshooting)** - Production-specific problems
 
-You can customize voice behavior in your `.env` file:
+### **Feature Questions**
+- **[User Guide](docs/user-guides/USER_GUIDE.md)** - Complete feature documentation
+- **[Admin Guide](docs/user-guides/ADMIN_GUIDE.md)** - Administrative functions
+- **[API Reference](docs/user-guides/API_REFERENCE.md)** - REST API details
 
-```env
-ENABLE_VOICE_ASSISTANT=True
-VOICE_LANGUAGE=en-US
-VOICE_RATE=150
-```
+---
 
-### SMS Length Limits
+## 🤝 **Contributing**
 
-The system automatically summarizes responses to fit SMS limits:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-```env
-MAX_SMS_LENGTH=160
-```
+---
 
-## Development
+## 📞 **Support**
 
-### Local Development (without Docker)
+- **Documentation**: [Complete Documentation](docs/README.md)
+- **Issues**: Use the issue tracker for bug reports
+- **Production Support**: See [Production Guide](docs/operations/PRODUCTION.md)
 
-```bash
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+---
 
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the application
-python app.py
-```
-
-### Testing
-
-Run the comprehensive test suite:
-
-```bash
-python test_setup.py
-```
-
-This will test:
-- Environment variables
-- Cursor AI integration
-- Voice assistant functionality
-- Twilio API connection
-- Flask application
-
-## Troubleshooting
-
-### Common Issues
-
-1. **"Cursor AI agent not initialized"**: Check your CURSOR_API_KEY and OPENAI_API_KEY
-2. **"Voice assistant not enabled"**: Set ENABLE_VOICE_ASSISTANT=True in your .env file
-3. **"Twilio webhook not receiving messages"**: Ensure the webhook URL is correctly configured
-4. **"Audio files not accessible"**: Check file permissions and ensure the audio directory exists
-
-### Logs
-
-Check the Docker logs for detailed error information:
-
-```bash
-docker-compose logs web
-docker-compose logs ngrok
-```
-
-## Security and Future Considerations
-
-- Keep your API keys secure and never commit them to version control
-- The `.env` file is already in `.gitignore` for security
-- Consider implementing rate limiting for production use
-- Review and adjust voice assistant settings based on your use case
-- Consider further enhancements (e.g., error handling, logging, advanced task routing, admin dashboard, analytics, etc.)
-
-## Successful Test Results
-
-### Dev server
-![img_1.png](img_1.png)
-
-### Webhook receiver
-![img_2.png](img_2.png)
-
-### Twilio incoming and outgoing sms logs with message bodies
-![img_3.png](img_3.png)
-
-### Incoming sms message with work detail
-![img_4.png](img_4.png)
-
-### outgoing sms message detail with work summary
-![img_5.png](img_5.png)
+**🎉 Ready to transform SMS into intelligent AI assistance? Start with the [Quick Start Guide](docs/getting-started/QUICK_START.md)!**
 

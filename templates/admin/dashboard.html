@@ -23,7 +23,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             padding: 1rem 2rem;
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
         }
         
@@ -51,27 +51,22 @@
         }
         
         .nav a {
-            color: #666;
+            color: #667eea;
             text-decoration: none;
             margin-right: 2rem;
-            padding: 0.5rem;
-            border-radius: 3px;
-            transition: all 0.3s;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.3s;
         }
         
-        .nav a.active {
-            color: #667eea;
-            background: #f0f4ff;
-        }
-        
-        .nav a:hover {
-            color: #667eea;
+        .nav a.active, .nav a:hover {
+            border-bottom-color: #667eea;
         }
         
         .container {
-            padding: 2rem;
             max-width: 1200px;
             margin: 0 auto;
+            padding: 2rem;
         }
         
         .metrics-grid {
@@ -84,143 +79,78 @@
         .metric-card {
             background: white;
             padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            transition: transform 0.3s;
-        }
-        
-        .metric-card:hover {
-            transform: translateY(-2px);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .metric-card h3 {
             color: #666;
             font-size: 0.9rem;
             margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         
         .metric-card .value {
             font-size: 2rem;
             font-weight: bold;
             color: #333;
-            margin-bottom: 0.5rem;
         }
         
         .metric-card .change {
             font-size: 0.8rem;
-            color: #28a745;
+            margin-top: 0.5rem;
         }
         
-        .metric-card.warning .value {
-            color: #ffc107;
+        .change.positive {
+            color: #10b981;
         }
         
-        .metric-card.danger .value {
-            color: #dc3545;
+        .change.negative {
+            color: #ef4444;
         }
         
-        .chart-grid {
+        .charts-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
             margin-bottom: 2rem;
         }
         
-        .chart-container {
+        .chart-card {
             background: white;
             padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
-        .chart-container h3 {
+        .chart-card h3 {
             margin-bottom: 1rem;
             color: #333;
         }
         
-        .activity-feed {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-        
-        .activity-feed h3 {
-            padding: 1.5rem;
-            margin: 0;
-            border-bottom: 1px solid #e1e5e9;
-            color: #333;
-        }
-        
-        .activity-item {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .activity-item:last-child {
-            border-bottom: none;
-        }
-        
-        .activity-info {
-            flex: 1;
-        }
-        
-        .activity-user {
-            font-weight: 500;
-            color: #333;
-        }
-        
-        .activity-task {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .activity-time {
-            color: #999;
-            font-size: 0.8rem;
-        }
-        
         .status-indicator {
+            display: inline-block;
             width: 8px;
             height: 8px;
             border-radius: 50%;
             margin-right: 0.5rem;
         }
         
-        .status-success {
-            background: #28a745;
+        .status-healthy { background: #10b981; }
+        .status-warning { background: #f59e0b; }
+        .status-error { background: #ef4444; }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
         }
         
-        .status-error {
-            background: #dc3545;
-        }
-        
-        .tier-badge {
-            padding: 0.2rem 0.5rem;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 500;
-            text-transform: uppercase;
-        }
-        
-        .tier-free {
-            background: #e9ecef;
-            color: #495057;
-        }
-        
-        .tier-premium {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .tier-enterprise {
-            background: #d1ecf1;
-            color: #0c5460;
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
         }
         
         .refresh-btn {
@@ -230,197 +160,278 @@
             padding: 0.5rem 1rem;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: background-color 0.3s;
+            float: right;
         }
         
         .refresh-btn:hover {
             background: #5a6fd8;
         }
-        
-        @media (max-width: 768px) {
-            .chart-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .container {
-                padding: 1rem;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🤖 SMS-Cursor AI Dashboard</h1>
+        <h1>🤖 SMS-Cursor AI Admin</h1>
         <div>
-            <button onclick="refreshData()" class="refresh-btn">🔄 Refresh</button>
-            <a href="/admin/logout" class="logout">Logout</a>
+            <button class="refresh-btn" onclick="refreshData()">Refresh</button>
+            <a href="/dashboard/logout" class="logout">Logout</a>
         </div>
     </div>
     
     <div class="nav">
-        <a href="/admin/dashboard" class="active">Dashboard</a>
-        <a href="/admin/users">Users</a>
-        <a href="/admin/analytics">Analytics</a>
-        <a href="/admin/system">System</a>
+        <a href="/dashboard/dashboard" class="active">Dashboard</a>
+        <a href="/dashboard/users">Users</a>
+        <a href="/dashboard/analytics">Analytics</a>
+        <a href="/dashboard/system">System</a>
     </div>
     
     <div class="container">
-        <!-- Metrics Overview -->
         <div class="metrics-grid">
             <div class="metric-card">
                 <h3>Total Users</h3>
-                <div class="value">{{ overview.total_users }}</div>
-                <div class="change">{{ overview.active_users }} active this month</div>
+                <div class="value" id="total-users">{{ overview.total_users }}</div>
             </div>
             
             <div class="metric-card">
-                <h3>Tasks Today</h3>
-                <div class="value">{{ overview.tasks_today }}</div>
-                <div class="change">{{ overview.total_tasks }} total tasks</div>
+                <h3>Active Users (7 days)</h3>
+                <div class="value" id="active-users">{{ overview.active_users }}</div>
             </div>
             
-            <div class="metric-card {% if overview.success_rate < 90 %}warning{% endif %}">
+            <div class="metric-card">
+                <h3>Total Tasks</h3>
+                <div class="value" id="total-tasks">{{ overview.total_tasks }}</div>
+            </div>
+            
+            <div class="metric-card">
                 <h3>Success Rate</h3>
-                <div class="value">{{ overview.success_rate }}%</div>
-                <div class="change">Last 7 days</div>
+                                    <div class="value" id="success-rate">{{ overview.success_rate|floatformat:1 }}%</div>
             </div>
             
-            <div class="metric-card {% if overview.avg_processing_time > 10 %}warning{% endif %}">
-                <h3>Avg Response Time</h3>
-                <div class="value">{{ overview.avg_processing_time }}s</div>
-                <div class="change">Processing time</div>
+            <div class="metric-card">
+                <h3>Avg Processing Time</h3>
+                                    <div class="value" id="avg-processing-time">{{ overview.avg_processing_time|floatformat:2 }}s</div>
+            </div>
+            
+            <div class="metric-card">
+                <h3>Recent Activity (24h)</h3>
+                <div class="value" id="recent-activity">{{ overview.recent_activity }}</div>
             </div>
         </div>
         
-        <!-- Charts and Activity -->
-        <div class="chart-grid">
-            <div class="chart-container">
-                <h3>User Growth (Last 30 Days)</h3>
-                <canvas id="userGrowthChart" width="400" height="200"></canvas>
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Users by Tier</h3>
+                <canvas id="tierChart" width="400" height="200" style="max-height: 200px; !important;"></canvas>
             </div>
             
-            <div class="activity-feed">
-                <h3>Recent Activity</h3>
-                {% for activity in recent_activity %}
-                <div class="activity-item">
-                    <div class="activity-info">
-                        <div class="activity-user">
-                            <span class="status-indicator {% if activity.success %}status-success{% else %}status-error{% endif %}"></span>
-                            {{ activity.user_phone[-4:] }}***
-                            <span class="tier-badge tier-{{ activity.user_tier }}">{{ activity.user_tier }}</span>
-                        </div>
-                        <div class="activity-task">{{ activity.category }} task ({{ activity.complexity_score|round(2) }} complexity)</div>
+            <div class="chart-card">
+                <h3>System Health</h3>
+                <div id="system-health">
+                    <div>
+                        {% if system_health.database_connected %}
+                <span class="status-indicator status-healthy"></span>
+                {% else %}
+                <span class="status-indicator status-error"></span>
+                {% endif %}
+                        Database: {% if system_health.database_connected %}Connected{% else %}Disconnected{% endif %}
                     </div>
-                    <div class="activity-time">{{ activity.created_at }}</div>
+                    <div style="margin-top: 0.5rem;">
+                        {% if system_health.errors_24h == 0 %}
+                <span class="status-indicator status-healthy"></span>
+                {% else %}
+                <span class="status-indicator status-warning"></span>
+                {% endif %}
+                        Tasks (24h): {{ system_health.tasks_24h }}
+                    </div>
+                    <div style="margin-top: 0.5rem;">
+                        {% if system_health.errors_24h == 0 %}
+                <span class="status-indicator status-healthy"></span>
+                {% else %}
+                <span class="status-indicator status-error"></span>
+                {% endif %}
+                        Recent Errors: {{ system_health.errors_24h }}
+                    </div>
                 </div>
-                {% endfor %}
-            </div>
-        </div>
-        
-        <!-- Performance Metrics -->
-        <div class="chart-grid">
-            <div class="chart-container">
-                <h3>Tasks by Category</h3>
-                <canvas id="categoryChart" width="400" height="200"></canvas>
             </div>
             
-            <div class="chart-container">
-                <h3>User Tier Distribution</h3>
-                <canvas id="tierChart" width="300" height="200"></canvas>
+            <div class="chart-card">
+                <h3>Recent Errors</h3>
+                <div id="recent-errors">
+                    {% if system_health.recent_errors %}
+                        {% for error in system_health.recent_errors|slice:":5" %}
+                        <div style="margin-bottom: 0.5rem; padding: 0.5rem; background: #fef2f2; border-radius: 3px;">
+                            <strong>{{ error.error_type }}</strong><br>
+                            <small>{{ error.timestamp|time:"H:i:s" }} - {% if error.user_phone %}{{ error.user_phone }}{% else %}System{% endif %}</small>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div style="color: #10b981;">No recent errors</div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-    
+
     <script>
-        // Sample data for demo
-        const userGrowthData = {
-            labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'],
+        // Initialize charts with server-side data
+        const overviewData = {{ overview|safe }};
+        const systemHealthData = {{ system_health|safe }};
+        
+        // Create tier chart data from server data
+        const tierLabels = Object.keys(overviewData.users_by_tier || {}).map(tier => 
+            tier.charAt(0).toUpperCase() + tier.slice(1)
+        );
+        const tierValues = Object.values(overviewData.users_by_tier || {});
+        
+        const tierData = {
+            labels: tierLabels,
             datasets: [{
-                label: 'New Users',
-                data: [5, 8, 12, 7, 15],
-                borderColor: '#667eea',
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                tension: 0.3,
-                fill: true
+                data: tierValues,
+                backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4ecdc4']
             }]
         };
         
-        const categoryData = {
-            labels: ['Coding', 'Debug', 'General', 'Design'],
-            datasets: [{
-                label: 'Tasks',
-                data: [25, 15, 20, 10],
-                backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c']
-            }]
-        };
-        
-                 const tierData = {
-             labels: ['Free', 'Premium', 'Enterprise'],
-             datasets: [{
-                 data: [50, 30, 10],
-                 backgroundColor: ['#e9ecef', '#fff3cd', '#d1ecf1']
-             }]
-         };
-        
-        // User Growth Chart
-        const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
-        const userGrowthChart = new Chart(userGrowthCtx, {
-            type: 'line',
-            data: userGrowthData,
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
-            }
-        });
-        
-        // Category Chart
-        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-        const categoryChart = new Chart(categoryCtx, {
-            type: 'bar',
-            data: categoryData,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
-            }
-        });
-        
-        // Tier Distribution Chart
+        // Initialize tier chart
         const tierCtx = document.getElementById('tierChart').getContext('2d');
         const tierChart = new Chart(tierCtx, {
             type: 'doughnut',
             data: tierData,
             options: {
-                responsive: true
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
             }
         });
         
-        // Real-time data refresh
+        // Function to refresh data
         function refreshData() {
-            fetch('/admin/api/analytics/realtime')
-                .then(response => response.json())
-                .then(data => {
-                    // Update metrics if needed
-                    console.log('Real-time data:', data);
+            console.log('Refreshing dashboard data...');
+            
+            // Fetch overview data
+            fetch('/dashboard/api/overview')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch overview data');
+                    }
+                    return response.json();
                 })
-                .catch(error => console.error('Error fetching real-time data:', error));
+                .then(data => {
+                    // Update metrics
+                    document.getElementById('total-users').textContent = data.total_users || 0;
+                    document.getElementById('active-users').textContent = data.active_users || 0;
+                    document.getElementById('total-tasks').textContent = data.total_tasks || 0;
+                    document.getElementById('success-rate').textContent = (data.success_rate || 0).toFixed(1) + '%';
+                    document.getElementById('avg-processing-time').textContent = (data.avg_processing_time || 0).toFixed(2) + 's';
+                    document.getElementById('recent-activity').textContent = data.recent_activity || 0;
+                    
+                    // Update tier chart
+                    const newLabels = Object.keys(data.users_by_tier || {}).map(tier => 
+                        tier.charAt(0).toUpperCase() + tier.slice(1)
+                    );
+                    const newData = Object.values(data.users_by_tier || {});
+                    
+                    tierChart.data.labels = newLabels;
+                    tierChart.data.datasets[0].data = newData;
+                    tierChart.update();
+                    
+                    console.log('Overview data updated successfully');
+                })
+                .catch(error => {
+                    console.error('Error loading system configuration:', error);
+                    showError('Error loading system configuration: ' + error.message);
+                });
+            
+            // Fetch system health
+            fetch('/dashboard/api/system/health')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch system health');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    updateSystemHealth(data);
+                    console.log('System health updated successfully');
+                })
+                .catch(error => {
+                    console.error('Error loading system health:', error);
+                    showError('Error loading system health: ' + error.message);
+                });
+        }
+        
+        function updateSystemHealth(data) {
+
+            const healthDiv = document.getElementById('system-health');
+            let dbStatus = 'unknown'; // Default to unknown
+            if (data && data.database_health && data.database_health.status) {
+                dbStatus = data.database_health.status === 'healthy' ? 'healthy' : 'error';
+            }
+            const taskStatus = data && data.slow_tasks_count !== undefined ? (data.slow_tasks_count === 0 ? 'healthy' : 'warning') : 'unknown'; // Add checks for data and slow_tasks_count
+            const errorStatus = data && data.error_stats !== undefined ? (data.error_stats.length === 0 ? 'healthy' : 'error') : 'unknown'; // Add checks for data and error_stats
+
+
+            healthDiv.innerHTML = `
+                <div>
+                    <span class="status-indicator status-${dbStatus}"></span>
+                    Database: ${data.database_health.status.charAt(0).toUpperCase() + data.database_health.status.slice(1)}
+                </div>
+                <div style="margin-top: 0.5rem;">
+                    <span class="status-indicator status-${taskStatus}"></span>
+                    Slow Tasks (24h): ${data.slow_tasks_count}
+                </div>
+                <div style="margin-top: 0.5rem;">
+                    <span class="status-indicator status-${errorStatus}"></span>
+                    Error Types: ${data.error_stats.length}
+                </div>
+            `;
+            
+            // Update recent errors
+            const errorsDiv = document.getElementById('recent-errors');
+            if (data.recent_errors && data.recent_errors.length > 0) {
+                errorsDiv.innerHTML = data.recent_errors.slice(0, 5).map(error => `
+                    <div style="margin-bottom: 0.5rem; padding: 0.5rem; background: #fef2f2; border-radius: 3px;">
+                        <strong>${error.error_type}</strong><br>
+                        <small>${new Date(error.timestamp).toLocaleTimeString()} - ${error.user_phone || 'System'}</small>
+                    </div>
+                `).join('');
+            } else {
+                errorsDiv.innerHTML = '<div style="color: #10b981;">No recent errors</div>';
+            }
+        }
+        
+        function showError(message) {
+            // Remove existing error messages
+            const existingErrors = document.querySelectorAll('.error-message');
+            existingErrors.forEach(error => error.remove());
+            
+            // Create new error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            
+            // Insert at the top of the container
+            const container = document.querySelector('.container');
+            container.insertBefore(errorDiv, container.firstChild);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
         }
         
         // Auto-refresh every 30 seconds
         setInterval(refreshData, 30000);
+        
+        // Initial load message
+        console.log('Dashboard loaded successfully with data:', overviewData);
+        
+        // Initialize system health on page load
+        if (systemHealthData) {
+            updateSystemHealth(systemHealthData);
+        }
     </script>
 </body>
 </html> 
