@@ -9,7 +9,7 @@
 ### **Get Running in 5 Minutes**
 ```bash
 # Clone and start
-git clone <your-repo>
+git clone https://github.com/iMeyerKimera/sms2AIagent.git
 cd sms2AIagent
 cp env.example .env
 # Edit .env with your Twilio & OpenAI credentials
@@ -98,88 +98,90 @@ curl http://localhost:5001/health
 - **Admin Dashboard**: http://localhost:5001/dashboard/
 - **Django Admin**: http://localhost:5001/admin/
 - **API Documentation**: http://localhost:5001/api/
-- **Health Check**: http://localhost:5001/health
-
-### **Default Credentials**
-- **Admin Dashboard**: admin / admin123
-- **Django Admin**: Create superuser with `python manage.py createsuperuser`
 
 ---
 
-## 👥 **User Tiers**
+## 📄 **License**
 
-| Tier | SMS/Hour | AI Tokens | Features |
-|------|----------|-----------|----------|
-| 🆓 **Free** | 10 | 1,000 | Basic task routing |
-| ⭐ **Premium** | 50 | 4,000 | Enhanced routing, priority |
-| 🏢 **Enterprise** | Unlimited | 8,000 | Custom configs, white-label |
+This project is released under the **MIT License** to encourage community contribution and adoption.
 
----
+### **MIT License Summary**
+- **License**: MIT License
+- **Usage**: Free for development, testing, and production
+- **Commercial Use**: Allowed with attribution
+- **Modification**: Allowed
+- **Distribution**: Allowed
 
-## 🧠 **Intelligent Task Routing**
+### **What You Can Do**
+- Use the software for any purpose (commercial or non-commercial)
+- Modify and adapt the code
+- Distribute copies of the software
+- Use the software privately
+- Sublicense the software
 
-The system automatically categorizes and routes SMS messages:
+### **What You Must Do**
+- Include the original copyright notice
+- Include the MIT license text
+- Include a disclaimer of warranty
 
-- **🖥️ Coding**: Programming tasks, code generation
-- **🐛 Debug**: Error analysis, troubleshooting  
-- **🎨 Design**: UI/UX design, architecture planning
-- **📝 Documentation**: Writing docs, README files
-- **📊 Analysis**: Data analysis, research
-- **💬 General**: Questions, conversations, explanations
-
-Each category gets optimized AI prompts and processing parameters.
-
----
-
-## 🚀 **Getting Started Paths**
-
-### **🆕 First Time User?**
-1. **[Quick Start](docs/getting-started/QUICK_START.md)** - Get running in 5 minutes
-2. **[User Guide](docs/user-guides/USER_GUIDE.md)** - Learn to use SMS features
-3. **[Admin Guide](docs/user-guides/ADMIN_GUIDE.md)** - Manage users and system
-
-### **🔧 Production Deployment?**
-1. **[Installation Guide](docs/getting-started/INSTALLATION.md)** - Complete setup
-2. **[Production Deployment](docs/operations/PRODUCTION.md)** - Production best practices
-3. **[Monitoring Guide](docs/operations/MONITORING.md)** - Set up monitoring
-
-### **💻 Developer/Customization?**
-1. **[Architecture Guide](docs/development/ARCHITECTURE.md)** - Understand the system
-2. **[Database Guide](docs/development/DATABASE.md)** - Database schema and operations
-3. **[API Reference](docs/user-guides/API_REFERENCE.md)** - API endpoints and usage
-
----
-
-## 🆘 **Need Help?**
-
-### **Common Issues**
-- **[Troubleshooting Guide](docs/operations/TROUBLESHOOTING.md)** - Comprehensive issue resolution
-- **[Production Issues](docs/operations/PRODUCTION.md#troubleshooting)** - Production-specific problems
-
-### **Feature Questions**
-- **[User Guide](docs/user-guides/USER_GUIDE.md)** - Complete feature documentation
-- **[Admin Guide](docs/user-guides/ADMIN_GUIDE.md)** - Administrative functions
-- **[API Reference](docs/user-guides/API_REFERENCE.md)** - REST API details
+**📋 [Full License Details](LICENSE)**
 
 ---
 
 ## 🤝 **Contributing**
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+We welcome contributions to the project! Please read our **[Contributing Guide](CONTRIBUTING.md)** for detailed information on:
+
+- How to set up your development environment
+- Code style and standards
+- Security guidelines and best practices
+- Pull request process
+- Issue reporting guidelines
+- Community code of conduct
+
+**📋 [Complete Contributing Guide](CONTRIBUTING.md)**
+
+---
+
+## 🙏 **Acknowledgments**
+
+SMS-to-AI Agent is built on the shoulders of many amazing open source projects. We extend our deepest gratitude to:
+
+### **👨‍💻 Original Developer**
+- **[iMeyerKimera](https://github.com/iMeyerKimera)** - Initial creator and architect of SMS-to-AI Agent
+
+### **🏗️ Core Technologies**
+- **[Django](https://www.djangoproject.com/)** - The web framework for perfectionists with deadlines
+- **[OpenAI](https://openai.com/)** - Advanced AI models and APIs
+- **[Twilio](https://www.twilio.com/)** - Communication APIs for SMS and voice
+- **[PostgreSQL](https://www.postgresql.org/)** - The world's most advanced open source database
+- **[Redis](https://redis.io/)** - Lightning-fast in-memory data store
+- **[Docker](https://www.docker.com/)** - Containerization platform
+
+### **🛠️ Development Tools**
+- **[Python](https://www.python.org/)** - Programming language that powers it all
+- **[Git](https://git-scm.com/)** - Version control and collaboration
+- **[Bootstrap](https://getbootstrap.com/)** - Responsive UI framework
+- **[Chart.js](https://www.chartjs.org/)** - Beautiful data visualization
+
+### **📚 Community & Documentation**
+- **[GitHub](https://github.com/)** - Platform for open source collaboration
+- **[Stack Overflow](https://stackoverflow.com/)** - Developer knowledge base
+- **[Read the Docs](https://readthedocs.org/)** - Documentation hosting
+
+**🎉 Special thanks to the entire open source community for making this project possible!**
+
+For a complete list of acknowledgments, see our **[Contributing Guide](CONTRIBUTING.md)**.
 
 ---
 
 ## 📞 **Support**
 
 - **Documentation**: [Complete Documentation](docs/README.md)
-- **Issues**: Use the issue tracker for bug reports
-- **Production Support**: See [Production Guide](docs/operations/PRODUCTION.md)
+- **Issues**: [GitHub Issues](https://github.com/your-repo/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/your-repo/discussions)
 
 ---
 
-**🎉 Ready to transform SMS into intelligent AI assistance? Start with the [Quick Start Guide](docs/getting-started/QUICK_START.md)!**
+**SMS-to-AI Agent: Where every text message becomes a development opportunity.**
 
