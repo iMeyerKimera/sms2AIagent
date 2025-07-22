@@ -1,22 +1,19 @@
 import os
 import logging
 import time
+import asyncio
 from datetime import datetime
-from flask import Flask, request, Response, jsonify, send_file
+from flask import Flask, request, Response, jsonify, send_file, session
 from twilio.rest import Client
 from twilio.twiml.messaging_response import MessagingResponse
 from dotenv import load_dotenv
 from functools import wraps
 import json
 
-# Import our custom modules
-from cursor_agent import CursorAgent
-from voice_assistant import VoiceAssistant
-
-# Load environment variables from .env file
+# Load environment variables first
 load_dotenv()
 
-# Configure logging
+# Configure logging first
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -27,18 +24,116 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Import our custom modules
+from cursor_agent import CursorAgent
+from voice_assistant import VoiceAssistant
+
+
+# Import admin dashboard separately (always available)
+try:
+    from admin_dashboard import admin_bp
+    logger.info("Admin dashboard loaded successfully")
+    ADMIN_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"Admin dashboard not available: {e}")
+    admin_bp = None
+    ADMIN_AVAILABLE = False
+
+# Temporarily disable advanced components for testing
+try:
+    from task_router import TaskRouter
+    from notification_system import NotificationSystem, notify_task_completion, notify_system_alert
+    ADVANCED_FEATURES_AVAILABLE = True
+    logger.info("Advanced features loaded successfully")
+except ImportError as e:
+    logger.warning(f"Advanced features not available: {e}")
+    ADVANCED_FEATURES_AVAILABLE = False
+    TaskRouter = None
+    NotificationSystem = None
+    notify_task_completion = None
+    notify_system_alert = None
+    logger.info("Advanced features loaded successfully")
+except ImportError as e:
+    logger.warning(f"Advanced features not available: {e}")
+    ADVANCED_FEATURES_AVAILABLE = False
+    TaskRouter = None
+    NotificationSystem = None
+    notify_task_completion = None
+    notify_system_alert = None
+
+# Note: logging already configured above
+
 app = Flask(__name__)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-secret-key-change-in-production')
+
+# Register admin blueprint
+if admin_bp:
+    app.register_blueprint(admin_bp)
+
+# Initialize new components
+try:
+    if ADVANCED_FEATURES_AVAILABLE:
+        task_router = TaskRouter()
+        notification_system = NotificationSystem()
+        logger.info("Successfully initialized Task Router and Notification System")
+        
+        # Setup default alert rules
+        notification_system.setup_alert_rules()
+    else:
+        task_router = None
+        notification_system = None
+except Exception as e:
+    logger.error(f"Error initializing advanced components: {e}")
+    task_router = None
+    notification_system = None
 
 # Rate limiting storage (in production, use Redis)
 request_timestamps = {}
-MAX_REQUESTS_PER_HOUR = 10
 
-def rate_limit(f):
-    """Simple rate limiting decorator"""
+def enhanced_rate_limit(f):
+    """Enhanced rate limiting using task router"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        from_number = request.values.get('From', 'unknown')
+        
+        if not task_router:
+            # Fallback to basic rate limiting
+            return basic_rate_limit(f)(*args, **kwargs)
+        
+        try:
+            # Use task router for sophisticated rate limiting
+            routing_result = task_router.route_task(from_number, request.values.get('Body', ''))
+            
+            if not routing_result["success"]:
+                if "rate limit" in routing_result.get("error", "").lower():
+                    logger.warning(f"Rate limit exceeded for {from_number}: {routing_result['error']}")
+                    response = MessagingResponse()
+                    message = routing_result["error"]
+                    if routing_result.get("upgrade_suggestion"):
+                        message += " Consider upgrading your tier for higher limits."
+                    response.message(message)
+                    return Response(str(response), mimetype='application/xml')
+                else:
+                    logger.error(f"Task routing error: {routing_result['error']}")
+                    # Continue with fallback processing
+            
+            # Store routing info in request context for later use
+            request.routing_info = routing_result
+            
+        except Exception as e:
+            logger.error(f"Error in enhanced rate limiting: {e}")
+            # Continue with fallback
+            
+        return f(*args, **kwargs)
+    return decorated_function
+
+def basic_rate_limit(f):
+    """Fallback basic rate limiting"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         from_number = request.values.get('From', 'unknown')
         current_time = time.time()
+        MAX_REQUESTS_PER_HOUR = 10
         
         # Clean old timestamps (older than 1 hour)
         request_timestamps[from_number] = [
@@ -95,62 +190,157 @@ except Exception as e:
     logger.error(f"Error initializing Twilio Client: {e}")
     twilio_client = None
 
-def create_enhanced_prompt(user_message):
-    """Create an enhanced prompt for better AI responses"""
-    system_prompt = """You are a helpful AI assistant that can perform various tasks. 
-    When responding to user requests:
-    1. Be helpful, accurate, and concise
-    2. If asked to create something, provide practical and actionable results
-    3. If asked to explain something, use clear and simple language
-    4. If asked to analyze something, provide insights and recommendations
-    5. Always consider the context and intent of the user's request
+def create_enhanced_prompt(user_message, routing_info=None):
+    """Create an enhanced prompt based on task analysis"""
+    if routing_info and routing_info.get("success"):
+        category = routing_info.get("category", "general")
+        complexity = routing_info.get("complexity_score", 0)
+        
+        system_prompts = {
+            "coding": """You are an expert software developer. When responding to coding requests:
+1. Provide clean, working code with comments
+2. Explain the solution approach
+3. Include error handling where appropriate
+4. Suggest best practices and optimizations
+5. Be precise and practical""",
+            
+            "debug": """You are a debugging expert. When helping with issues:
+1. Analyze the problem systematically
+2. Identify potential root causes
+3. Provide step-by-step debugging approaches
+4. Suggest preventive measures
+5. Be thorough and methodical""",
+            
+            "design": """You are a UX/UI design expert. When helping with design:
+1. Consider user experience principles
+2. Suggest modern, accessible solutions
+3. Think about responsive design
+4. Recommend best practices
+5. Be creative and user-focused""",
+            
+            "documentation": """You are a technical writer. When creating documentation:
+1. Structure information clearly
+2. Use simple, precise language
+3. Include practical examples
+4. Consider the audience level
+5. Be comprehensive yet concise""",
+            
+            "analysis": """You are a data analyst. When analyzing information:
+1. Look for patterns and insights
+2. Provide data-driven recommendations
+3. Consider multiple perspectives
+4. Highlight key findings
+5. Be objective and thorough"""
+        }
+        
+        system_prompt = system_prompts.get(category, """You are a helpful AI assistant. When responding:
+1. Be helpful, accurate, and concise
+2. Provide practical and actionable results
+3. Use clear and simple language
+4. Consider context and intent
+5. Be professional and courteous""")
+        
+        complexity_note = ""
+        if complexity > 0.7:
+            complexity_note = "\n\nNote: This appears to be a complex request. Take extra care to provide a thorough, well-structured response."
+        
+        return f"{system_prompt}{complexity_note}\n\nUser request: {user_message}"
     
-    User request: """
+    # Fallback to basic prompt
+    return f"""You are a helpful AI assistant. Be helpful, accurate, and concise.
     
-    return f"{system_prompt}{user_message}"
+User request: {user_message}"""
 
 def summarize_for_sms(text, max_length=160):
-    """Summarize text to fit SMS character limits"""
+    """Enhanced summarization with better logic"""
     if len(text) <= max_length:
         return text
     
-    summary_prompt = f"""Please summarize the following text to be under {max_length} characters, 
-    suitable for an SMS message. Be concise, direct, and preserve the most important information. 
-    If the text is too long to summarize meaningfully, provide a brief overview with key points.
+    # Try to preserve important information
+    lines = text.split('\n')
+    if len(lines) > 1:
+        # If multi-line, try to get the first meaningful line
+        for line in lines:
+            line = line.strip()
+            if line and len(line) <= max_length:
+                return line
     
-    Text: {text}
+    # Try cursor agent for intelligent summarization
+    if cursor_agent:
+        summary_prompt = f"""Summarize this text in {max_length} characters or less for SMS. Keep the most important information:
+
+{text}
+
+Summary:"""
+        
+        try:
+            result = cursor_agent.create_task(summary_prompt)
+            if result["success"]:
+                summary = result["response"].strip()
+                if len(summary) <= max_length:
+                    return summary
+        except Exception as e:
+            logger.error(f"Error in AI summarization: {e}")
     
-    Summary: """
-    
-    try:
-        # Use Cursor AI for summarization
-        result = cursor_agent.create_task(summary_prompt)
-        if result["success"]:
-            summary = result["response"].strip()
-            
-            # Fallback if summary is still too long
-            if len(summary) > max_length:
-                summary = text[:max_length-3] + "..."
-            return summary
+    # Fallback to smart truncation
+    if len(text) > max_length - 3:
+        # Try to break at sentence or word boundary
+        truncated = text[:max_length - 3]
+        last_space = truncated.rfind(' ')
+        last_period = truncated.rfind('.')
+        
+        if last_period > max_length * 0.7:  # If period is reasonably close to end
+            return text[:last_period + 1]
+        elif last_space > max_length * 0.8:  # If space is close to end
+            return truncated[:last_space] + "..."
         else:
-            # Fallback to simple truncation
-            return text[:max_length-3] + "..." if len(text) > max_length else text
-    except Exception as e:
-        logger.error(f"Error in summarization: {e}")
-        # Fallback to simple truncation
-        return text[:max_length-3] + "..." if len(text) > max_length else text
+            return truncated + "..."
+    
+    return text
 
 @app.route("/health", methods=['GET'])
 def health_check():
-    """Health check endpoint"""
-    status = {
-        "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        "cursor_agent_available": cursor_agent is not None,
-        "voice_assistant_available": voice_assistant is not None and voice_assistant.enable_voice,
-        "twilio_available": twilio_client is not None
-    }
-    return jsonify(status)
+    """Enhanced health check with system metrics"""
+    try:
+        # Get system metrics if task router is available
+        if task_router:
+            from admin_dashboard import AdminAnalytics
+            analytics = AdminAnalytics()
+            system_health = analytics.get_system_health()
+            
+            status = {
+                "status": system_health["status"],
+                "timestamp": datetime.now().isoformat(),
+                "cursor_agent_available": cursor_agent is not None,
+                "voice_assistant_available": voice_assistant is not None and voice_assistant.enable_voice,
+                "twilio_available": twilio_client is not None,
+                "task_router_available": task_router is not None,
+                "notification_system_available": notification_system is not None,
+                "metrics": {
+                    "error_rate": system_health["error_rate"],
+                    "avg_response_time": system_health["avg_response_time"],
+                    "active_users_hour": system_health["active_users_hour"]
+                }
+            }
+        else:
+            status = {
+                "status": "basic",
+                "timestamp": datetime.now().isoformat(),
+                "cursor_agent_available": cursor_agent is not None,
+                "voice_assistant_available": voice_assistant is not None and voice_assistant.enable_voice,
+                "twilio_available": twilio_client is not None,
+                "task_router_available": False,
+                "notification_system_available": False
+            }
+        
+        return jsonify(status)
+    except Exception as e:
+        logger.error(f"Health check error: {e}")
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }), 500
 
 @app.route("/voice", methods=['POST'])
 def voice_endpoint():
@@ -199,10 +389,11 @@ def serve_audio(filename):
         return jsonify({"error": "Audio file not found"}), 404
 
 @app.route("/sms", methods=['POST'])
-@rate_limit
+@enhanced_rate_limit
 def sms_reply():
-    """Receive SMS from Twilio, process with Cursor AI, and send reply."""
-
+    """Enhanced SMS processing with routing and notifications"""
+    start_time = time.time()
+    
     incoming_msg = request.values.get('Body', '').strip()
     from_number = request.values.get('From', '')
 
@@ -212,16 +403,39 @@ def sms_reply():
         logger.error("A client (Cursor AI or Twilio) is not initialized. Cannot process request.")
         return Response(status=500)
 
+    routing_info = getattr(request, 'routing_info', None)
+    task_id = None
+
     try:
-        # --- Step 1: Process the task with Cursor AI agent ---
-        logger.info("Asking Cursor AI agent to perform the task...")
+        # --- Step 1: Process the task with enhanced routing ---
+        logger.info("Processing task with enhanced routing...")
         
-        # Create enhanced prompt
-        enhanced_prompt = create_enhanced_prompt(incoming_msg)
+        # Get routing configuration if available
+        routing_config = {}
+        if routing_info and routing_info.get("success"):
+            task_id = routing_info.get("task_id")
+            routing_config = routing_info.get("routing_decision", {})
+            logger.info(f"Task routed: ID={task_id}, Category={routing_info.get('category')}, Priority={routing_info.get('priority')}")
+        
+        # Create enhanced prompt based on routing
+        enhanced_prompt = create_enhanced_prompt(incoming_msg, routing_info)
+        
+        # Configure Cursor AI based on routing
+        if routing_config:
+            # You could pass routing config to cursor_agent here
+            # For now, we'll use the standard approach
+            pass
+        
         result = cursor_agent.create_task(enhanced_prompt)
 
         if not result["success"]:
             logger.error(f"Cursor AI task failed: {result.get('error', 'Unknown error')}")
+            
+            # Mark task as failed if we have task tracking
+            if task_id and task_router:
+                processing_time = time.time() - start_time
+                task_router.complete_task(task_id, "", processing_time, False)
+            
             twilio_client.messages.create(
                 body='Sorry, I encountered an error processing your request. Please try again.',
                 from_=twilio_phone_number,
@@ -232,7 +446,7 @@ def sms_reply():
         detailed_text = result["response"]
         task_type = result.get("task_type", "general")
         
-        logger.info(f"Cursor AI agent completed task (type: {task_type})")
+        logger.info(f"Task completed (type: {task_type})")
 
         # --- Step 2: Create voice response if enabled ---
         voice_response = None
@@ -258,27 +472,59 @@ def sms_reply():
         )
         logger.info(f"Successfully sent summary to {from_number}")
 
-        # --- Step 5: If voice response was created, send it via MMS ---
+        # --- Step 5: Complete task tracking and send notifications ---
+        processing_time = time.time() - start_time
+        
+        if task_id and task_router:
+            task_router.complete_task(task_id, sms_friendly_text, processing_time, True)
+        
+        # Send completion notification if notification system is available
+        if notification_system and ADVANCED_FEATURES_AVAILABLE:
+            try:
+                task_data = {
+                    'category': routing_info.get('category', 'general') if routing_info else 'general',
+                    'processing_time': round(processing_time, 2)
+                }
+                # Run async notification
+                asyncio.create_task(notify_task_completion(from_number, task_data))
+            except Exception as e:
+                logger.error(f"Error sending notification: {e}")
+
+        # --- Step 6: Voice response handling ---
         if voice_response:
             try:
-                # Note: Twilio MMS requires the file to be accessible via URL
-                # In production, you'd upload the file to a cloud service
                 logger.info("Voice response would be sent via MMS in production")
             except Exception as e:
                 logger.error(f"Failed to send voice response: {e}")
 
     except Exception as e:
         logger.error(f"An unexpected error occurred: {e}", exc_info=True)
+        
+        # Mark task as failed
+        if task_id and task_router:
+            processing_time = time.time() - start_time
+            task_router.complete_task(task_id, "", processing_time, False)
+        
+        # Send system alert
+        if notification_system and ADVANCED_FEATURES_AVAILABLE:
+            try:
+                asyncio.create_task(notify_system_alert(
+                    "SMS Processing Error", 
+                    "error", 
+                    f"Error processing SMS from {from_number}: {str(e)}"
+                ))
+            except Exception:
+                pass
+        
         try:
             twilio_client.messages.create(
-                body='Sorry, an unexpected error occurred and I could not process your request. Please try again later.',
+                body='Sorry, an unexpected error occurred. Please try again later.',
                 from_=twilio_phone_number,
                 to=from_number
             )
         except Exception as twilio_error:
             logger.error(f"Failed to send error message via Twilio: {twilio_error}")
 
-    # Return an empty TwiML response to acknowledge receipt of the message
     return Response(str(MessagingResponse()), mimetype='application/xml')
 
 @app.route("/cursor/workspace", methods=['GET'])
@@ -297,9 +543,45 @@ def get_cursor_workspace():
         logger.error(f"Error getting workspace info: {e}")
         return jsonify({"error": str(e)}), 500
 
+# Background task to check system alerts
+def check_system_alerts():
+    """Background task to monitor system health and send alerts"""
+    if not notification_system or not task_router:
+        return
+    
+    try:
+        from admin_dashboard import AdminAnalytics
+        analytics = AdminAnalytics()
+        
+        # Get current metrics
+        metrics = analytics.get_system_health()
+        
+        # Check alert conditions
+        triggered_alerts = notification_system.check_alert_conditions(metrics)
+        
+        # Send alerts
+        for alert in triggered_alerts:
+            asyncio.create_task(notify_system_alert(
+                alert['name'],
+                alert['alert_level'],
+                f"Alert triggered: {alert['name']} - Current metrics: {metrics}"
+            ))
+            
+    except Exception as e:
+        logger.error(f"Error in system alert check: {e}")
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     debug = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
     
-    logger.info(f"Starting SMS-to-Cursor Agent on port {port} with debug={debug}")
+    logger.info(f"Starting Enhanced SMS-to-Cursor Agent on port {port} with debug={debug}")
+    
+    # Start background alert monitoring if components are available
+    if notification_system and task_router and ADVANCED_FEATURES_AVAILABLE:
+        import threading
+        alert_thread = threading.Timer(300.0, check_system_alerts)  # Check every 5 minutes
+        alert_thread.daemon = True
+        alert_thread.start()
+        logger.info("Started background alert monitoring")
+    
     app.run(debug=debug, port=port, host='0.0.0.0')

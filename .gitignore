@@ -63,3 +63,7 @@ config.local.py
 docker-compose.override.yml # Often used for local overrides
 
 /img.png
+/data/
+/backups/
+/static/admin/
+/static/rest_framework/
